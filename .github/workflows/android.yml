@@ -1,0 +1,57 @@
+# Собирает установочный APK для Android на серверах GitHub.
+# Результат: раздел Releases → «latest-android» → файл fit-ai.apk (ставится на телефон без компьютера).
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # адрес ИИ-сервера: Settings → Secrets and variables → Actions → Variables → EXPO_PUBLIC_API_URL
+      EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - name: Генерация Android-проекта
+        run: npx expo prebuild --platform android --no-install
+      - name: Сборка APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+      - run: cp android/app/build/outputs/apk/release/app-release.apk fit-ai.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fit-ai-apk
+          path: fit-ai.apk
+      - name: Публикация в Releases
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest-android
+          name: FIT / AI для Android (последняя сборка)
+          body: |
+            Установка: откройте эту страницу на телефоне, скачайте fit-ai.apk и разрешите установку из этого источника.
+            Сборка из коммита ${{ github.sha }}.
+          files: fit-ai.apk
+          make_latest: true

@@ -1,5 +1,7 @@
 # FIT / AI — мобильное фитнес-приложение
 
+![3D-модель и техника](docs/demo3d.gif)
+
 React Native + Expo SDK 57 + TypeScript + Expo Router. Тёмная тема с лаймовым акцентом.
 
 ## Что уже работает (MVP)
@@ -26,6 +28,15 @@ npx expo start
 ```
 
 Отсканируйте QR-код приложением **Expo Go** (Android) или камерой (iOS). Для веб-версии нажмите `w`.
+
+## Телефон без компьютера (24/7)
+
+Всё, кроме ИИ-тренера, работает прямо на телефоне: данные хранятся на устройстве, сервер не нужен.
+
+1. **Android-приложение (APK).** При каждом push в `main` GitHub Actions собирает APK (`.github/workflows/android.yml`). Скачайте `fit-ai.apk` на телефоне со страницы **Releases → latest-android** и установите (разрешите установку из браузера).
+2. **Веб-версия.** Тот же push публикует сайт на GitHub Pages (`.github/workflows/web.yml`): `https://<логин>.github.io/<репозиторий>/`. Подходит и для iPhone: «Поделиться → На экран „Домой“». Один раз включите Pages: Settings → Pages → Source: **GitHub Actions**.
+3. **ИИ-тренер 24/7.** Серверу нужен хостинг: на Render.com выберите New → Blueprint → этот репозиторий (`render.yaml`), задайте `ANTHROPIC_API_KEY`. Полученный адрес (`https://fit-ai-coach.onrender.com`) запишите в Settings → Secrets and variables → Actions → **Variables** → `EXPO_PUBLIC_API_URL` и перезапустите сборки. Бесплатный тариф Render засыпает без запросов, первый ответ после паузы может идти до минуты.
+4. **iPhone как приложение из App Store** требует аккаунт Apple Developer ($99 в год) и сборку через EAS (`npx eas build -p ios`).
 
 ## Запуск ИИ-тренера
 

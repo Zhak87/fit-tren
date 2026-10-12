@@ -1,0 +1,16 @@
+# Бесплатный хостинг ИИ-сервера на Render.com: New → Blueprint → выбрать этот репозиторий.
+# После создания задайте ANTHROPIC_API_KEY в Environment сервиса.
+services:
+  - type: web
+    name: fit-ai-coach
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: "*"
