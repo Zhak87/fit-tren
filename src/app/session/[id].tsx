@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Bar, Button, EmptyState, Pill, Ring, Screen, tap } from '../../components/ui';
+import { VideoBlock } from '../../components/VideoBlock';
 import { EXERCISES } from '../../data/exercises';
 import { MUSCLES } from '../../data/muscles';
 import { useStore } from '../../store/useStore';
@@ -38,6 +39,8 @@ export default function Session() {
   const [elapsed, setElapsed] = useState(0);
   const [rest, setRest] = useState<{ left: number; total: number } | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const [showTech, setShowTech] = useState(false);
+  const profile = useStore((st) => st.profile);
   const started = useRef(Date.now());
 
   useEffect(() => {
@@ -121,6 +124,11 @@ export default function Session() {
           <Pill text={pe.intensity} />
         </View>
         <Text style={font.small}>Ключевая подсказка: {e.tips[0]}</Text>
+        <Pressable onPress={() => { tap(); setShowTech(!showTech); }} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Ionicons name="body-outline" size={16} color={colors.accent} />
+          <Text style={{ color: colors.accent, fontWeight: '700' }}>{showTech ? 'Скрыть технику' : 'Показать технику: 3D и видео'}</Text>
+        </Pressable>
+        {showTech && <VideoBlock key={e.id} e={e} sex={profile?.sex ?? 'male'} height={240} />}
 
         <View style={{ flexDirection: 'row', paddingHorizontal: 4, marginTop: space(2) }}>
           <Text style={[font.label, { width: 44 }]}>#</Text>

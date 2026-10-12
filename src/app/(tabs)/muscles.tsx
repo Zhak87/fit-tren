@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useRef, useState } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
+import { Body3D } from '../../components/Body3D';
 import { BodyMap } from '../../components/BodyMap';
 import { ExerciseRow } from '../../components/ExerciseRow';
 import { Card, Chip, Screen, Segmented, tap } from '../../components/ui';
@@ -16,6 +17,7 @@ export default function Muscles() {
   const profile = useStore((s) => s.profile)!;
   const [sex, setSex] = useState<Sex>(profile.sex);
   const [view, setView] = useState<'front' | 'back'>('front');
+  const [model, setModel] = useState<'3d' | '2d'>('3d');
   const [selected, setSelected] = useState<MuscleId | null>('chest');
   const [place, setPlace] = useState<PlaceFilter>(profile.place === 'home' ? 'home' : 'all');
   const [level, setLevel] = useState<Level | 'all'>('all');
@@ -64,19 +66,40 @@ export default function Muscles() {
       </View>
       <Text style={[font.small, { marginTop: 4 }]}>Нажмите на мышцу, чтобы увидеть лучшие упражнения</Text>
 
-      <Card style={{ marginTop: space(4), alignItems: 'center', paddingVertical: space(5), backgroundColor: colors.surface }}>
-        <View style={{ position: 'absolute', top: 14, left: 16, zIndex: 2 }}>
-          <Text style={font.label}>{view === 'front' ? 'Вид спереди' : 'Вид сзади'}</Text>
-          {info && <Text style={[font.h3, { color: colors.accent, marginTop: 4 }]}>{info.name}</Text>}
-        </View>
-        <Animated.View style={{ transform: [{ scaleX: flip }], opacity: flip.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }}>
-          <BodyMap sex={sex} view={view} selected={selected} onSelect={select} height={400} />
-        </Animated.View>
-        <Pressable onPress={rotate} accessibilityRole="button" accessibilityLabel="Повернуть модель" style={({ pressed }) => [{ position: 'absolute', right: 14, bottom: 14, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.accent, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999 }, pressed && { opacity: 0.8 }]}>
-          <Ionicons name="sync" size={16} color={colors.onAccent} />
-          <Text style={{ color: colors.onAccent, fontWeight: '800' }}>Повернуть</Text>
-        </Pressable>
-      </Card>
+      <View style={{ marginTop: space(3) }}>
+        <Segmented
+          options={[
+            { value: '3d', label: '3D-модель' },
+            { value: '2d', label: 'Схема' },
+          ]}
+          value={model}
+          onChange={setModel}
+        />
+      </View>
+
+      {model === '3d' ? (
+        <Card style={{ marginTop: space(3), padding: 0, overflow: 'hidden', backgroundColor: colors.surface }}>
+          <Body3D sex={sex} mode="map" selected={selected} height={440} onSelect={select} onError={() => setModel('2d')} />
+          <View pointerEvents="none" style={{ position: 'absolute', top: 14, left: 16 }}>
+            <Text style={font.label}>3D · вращайте пальцем</Text>
+            {info && <Text style={[font.h3, { color: colors.accent, marginTop: 4 }]}>{info.name}</Text>}
+          </View>
+        </Card>
+      ) : (
+        <Card style={{ marginTop: space(3), alignItems: 'center', paddingVertical: space(5), backgroundColor: colors.surface }}>
+          <View style={{ position: 'absolute', top: 14, left: 16, zIndex: 2 }}>
+            <Text style={font.label}>{view === 'front' ? 'Вид спереди' : 'Вид сзади'}</Text>
+            {info && <Text style={[font.h3, { color: colors.accent, marginTop: 4 }]}>{info.name}</Text>}
+          </View>
+          <Animated.View style={{ transform: [{ scaleX: flip }], opacity: flip.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }}>
+            <BodyMap sex={sex} view={view} selected={selected} onSelect={select} height={400} />
+          </Animated.View>
+          <Pressable onPress={rotate} accessibilityRole="button" accessibilityLabel="Повернуть схему" style={({ pressed }) => [{ position: 'absolute', right: 14, bottom: 14, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.accent, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 999 }, pressed && { opacity: 0.8 }]}>
+            <Ionicons name="sync" size={16} color={colors.onAccent} />
+            <Text style={{ color: colors.onAccent, fontWeight: '800' }}>Повернуть</Text>
+          </Pressable>
+        </Card>
+      )}
 
       {info && (
         <>
